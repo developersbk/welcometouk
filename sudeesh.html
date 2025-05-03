@@ -2,381 +2,405 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Albrecht Discounts</title>
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-    <!-- Custom Dark Theme CSS -->
-    <style>
-        body {
-            background-color: #0f172a;
-            font-family: 'Segoe UI', sans-serif;
-            color: white;
-            padding: 20px;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Albrecht Discounts</title>
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <!-- Custom Dark Theme CSS -->
+  <style>
+    body {
+      background-color: #0f172a;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      padding: 20px;
+    }
 
-        .dataTables_wrapper {
-            color: white;
-        }
+    .dataTables_wrapper {
+      color: white;
+    }
 
-        table.dataTable {
-            background-color: #1e293b;
-            border-collapse: collapse;
-            width: 100%;
-        }
+    table.dataTable {
+      background-color: #1e293b;
+      border-collapse: collapse;
+      width: 100%;
+    }
 
-        table.dataTable th,
-        table.dataTable td {
-            padding: 10px;
-            color: white;
-        }
+    table.dataTable th,
+    table.dataTable td {
+      padding: 10px;
+      color: white;
+    }
 
-        table.dataTable thead {
-            background-color: #111827;
-        }
+    table.dataTable thead {
+      background-color: #111827;
+    }
 
-        table.dataTable thead th {
-            border-bottom: 1px solid #374151;
-        }
+    table.dataTable thead th {
+      border-bottom: 1px solid #374151;
+    }
 
-        table.dataTable tbody tr:nth-child(odd) {
-            background-color: #1e293b;
-        }
+    table.dataTable tbody tr:nth-child(odd) {
+      background-color: #1e293b;
+    }
 
-        table.dataTable tbody tr:nth-child(even) {
-            background-color: #111827;
-        }
+    table.dataTable tbody tr:nth-child(even) {
+      background-color: #111827;
+    }
 
-        input[type="search"] {
-            background-color: #1e293b;
-            color: white;
-            border: 1px solid #374151;
-            padding: 6px;
-            border-radius: 4px;
-        }
+    input[type="search"] {
+      background-color: #1e293b;
+      color: white;
+      border: 1px solid #374151;
+      padding: 6px;
+      border-radius: 4px;
+    }
 
-        select {
-            background-color: #1e293b;
-            color: white;
-            border: 1px solid #374151;
-            padding: 4px;
-        }
+    select {
+      background-color: #1e293b;
+      color: white;
+      border: 1px solid #374151;
+      padding: 6px 10px;
+      border-radius: 4px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
 
-        .dataTables_paginate .paginate_button {
-            background-color: #1e293b;
-            color: white !important;
-            border: 1px solid #374151;
-            margin: 2px;
-        }
+    select option {
+      background-color: #1e293b;
+      color: white;
+    }
 
-        .dataTables_paginate .paginate_button.current {
-            background-color: #2563eb !important;
-            color: white !important;
-        }
+    .dataTables_paginate .paginate_button {
+      background-color: #1e293b;
+      color: white !important;
+      border: 1px solid #374151;
+      margin: 2px;
+    }
 
-        /* Base styling for all select elements */
-        select {
-            background-color: #1e293b;
-            color: white;
-            border: 1px solid #374151;
-            padding: 6px 10px;
-            border-radius: 4px;
-            appearance: none;
-            /* remove default arrow on most browsers */
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            position: relative;
-            z-index: 1;
-        }
+    .dataTables_paginate .paginate_button.current {
+      background-color: #2563eb !important;
+      color: white !important;
+    }
 
-        /* Optional: Add custom arrow */
-        select::after {
-            content: '';
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
+    /* Custom Search Input Styling */
+    #customSearch {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      background-color: #1e293b;
+      color: white;
+      border: 1px solid #374151;
+      border-radius: 4px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-        /* Fix for Firefox white dropdown issue */
-        select option {
-            background-color: #1e293b;
-            color: white;
-        }
-    </style>
+    /* Responsive flex layout for length and pagination */
+    div.dataTables_wrapper div.dataTables_length,
+    div.dataTables_wrapper div.dataTables_paginate {
+      margin-top: 15px;
+    }
+
+    div.dataTables_wrapper .bottom {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
 </head>
 
 <body>
 
+  <div style="background-color: #0f172a; padding-top: 10px;">
     <h2>Sudeesh's List</h2>
+    <input type="text" id="customSearch" placeholder="Search table..." />
+  </div>
 
-    <table id="employeeTable" class="display" style="width:100%">
-        <thead>
-            <tr>
-                <th>PLU</th>
-                <th>Product Code</th>
-                <th>Product Name</th>
-                <th>Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>2</td>
-                <td>807365</td>
-                <td>AVOCADO</td>
-                <td>0.89</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>701238</td>
-                <td>BAG ECO LOOP</td>
-                <td>0.30</td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>808368</td>
-                <td>GRAPEFRUIT</td>
-                <td>0.49</td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>21345</td>
-                <td>BAG COMPOSTABLE</td>
-                <td>0.10</td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td>810989</td>
-                <td>PEPPERS RED LOOSE</td>
-                <td>0.69</td>
-            </tr>
-            <tr>
-                <td>7</td>
-                <td>60170</td>
-                <td>SWEDE</td>
-                <td>0.62</td>
-            </tr>
-            <tr>
-                <td>8</td>
-                <td>822684</td>
-                <td>HONEYDEW MELON</td>
-                <td>1.89</td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td>835877</td>
-                <td>ECO CARRIER BAG</td>
-                <td>0.30</td>
-            </tr>
-            <tr>
-                <td>10</td>
-                <td>51029</td>
-                <td>CAULIFLOWER</td>
-                <td>0.89</td>
-            </tr>
-            <tr>
-                <td>11</td>
-                <td>78509</td>
-                <td>CABBAGE SAVOY</td>
-                <td>0.75</td>
-            </tr>
-            <tr>
-                <td>12</td>
-                <td>842706</td>
-                <td>REUSEABLE BAG 0.65</td>
-                <td>0.65</td>
-            </tr>
-            <tr>
-                <td>13</td>
-                <td>827767</td>
-                <td>COCONUT</td>
-                <td>0.89</td>
-            </tr>
-            <tr>
-                <td>15</td>
-                <td>841660</td>
-                <td>PAPAYA</td>
-                <td>1.49</td>
-            </tr>
-            <tr>
-                <td>16</td>
-                <td>807306</td>
-                <td>GALIA MELON</td>
-                <td>1.79</td>
-            </tr>
-            <tr>
-                <td>17</td>
-                <td>836859</td>
-                <td>BANANAS LOOSE</td>
-                <td>0.16</td>
-            </tr>
-            <tr>
-                <td>19</td>
-                <td>807450</td>
-                <td>PINEAPPLE</td>
-                <td>0.99</td>
-            </tr>
-            <tr>
-                <td>21</td>
-                <td>830295</td>
-                <td>AUBERGINE EACH</td>
-                <td>0.95</td>
-            </tr>
-            <tr>
-                <td>22</td>
-                <td>700993</td>
-                <td>BAKING POTATO</td>
-                <td>0.24</td>
-            </tr>
-            <tr>
-                <td>23</td>
-                <td>810320</td>
-                <td>CUCUMBER</td>
-                <td>0.89</td>
-            </tr>
-            <tr>
-                <td>24</td>
-                <td>845472</td>
-                <td>SPRING ONIONS</td>
-                <td>0.69</td>
-            </tr>
-            <tr>
-                <td>25</td>
-                <td>842998</td>
-                <td>BEEF TOMATO</td>
-                <td>0.69</td>
-            </tr>
-            <tr>
-                <td>26</td>
-                <td>833418</td>
-                <td>POMEGRANATE LOOSE</td>
-                <td>1.15</td>
-            </tr>
-            <tr>
-                <td>27</td>
-                <td>54829</td>
-                <td>WHITE/RED CABBAGE</td>
-                <td>0.75</td>
-            </tr>
-            <tr>
-                <td>30</td>
-                <td>807341</td>
-                <td>WATERMELON</td>
-                <td>3.29</td>
-            </tr>
-            <tr>
-                <td>32</td>
-                <td>818340</td>
-                <td>ASPARAGUS BUNDLE</td>
-                <td>0.00</td>
-            </tr>
-            <tr>
-                <td>33</td>
-                <td>821235</td>
-                <td>SWEET POTATO LOOSE</td>
-                <td>0.69</td>
-            </tr>
-            <tr>
-                <td>34</td>
-                <td>77866</td>
-                <td>APPLES BRAMLEY EA</td>
-                <td>0.59</td>
-            </tr>
-            <tr>
-                <td>37</td>
-                <td>810043</td>
-                <td>AVOCADO LOOSE XL</td>
-                <td>1.39</td>
-            </tr>
-            <tr>
-                <td>39</td>
-                <td>819957</td>
-                <td>BROCCOLI</td>
-                <td>0.79</td>
-            </tr>
-            <tr>
-                <td>40</td>
-                <td>819934</td>
-                <td>ICEBERG LETTUCE</td>
-                <td>0.89</td>
-            </tr>
-            <tr>
-                <td>43</td>
-                <td>807344</td>
-                <td>MANGO LOOSE</td>
-                <td>0.89</td>
-            </tr>
-            <tr>
-                <td>45</td>
-                <td>87191</td>
-                <td>BUTTERNUT SQUASH</td>
-                <td>1.09</td>
-            </tr>
-            <tr>
-                <td>46</td>
-                <td>725420</td>
-                <td>Sml Bramley Apple</td>
-                <td>0.42</td>
-            </tr>
-            <tr>
-                <td>49</td>
-                <td>730015</td>
-                <td>BUNCHED BEETROOT</td>
-                <td>1.39</td>
-            </tr>
-            <tr>
-                <td>51</td>
-                <td>705857</td>
-                <td>CORN LOOSE</td>
-                <td>0.49</td>
-            </tr>
-            <tr>
-                <td>53</td>
-                <td>741861</td>
-                <td>XL GARLIC EACH</td>
-                <td>0.37</td>
-            </tr>
-            <tr>
-                <td>63</td>
-                <td>829073</td>
-                <td>LARGE CUCUMBER</td>
-                <td>0.99</td>
-            </tr>
-            <tr>
-                <td>00</td>
-                <td>716</td>
-                <td>WATER 6 PACK</td>
-                <td>0.00</td>
-            </tr>
-            <tr>
-                <td>00</td>
-                <td>44203</td>
-                <td>WATER 12 PACK SMALL</td>
-                <td>0.00</td>
-            </tr>
-            <tr>
-                <td>00</td>
-                <td>6189</td>
-                <td>SPARKLING WATER 4 PACK</td>
-                <td>0.00</td>
-            </tr>
-        </tbody>
-    </table>
+  <table id="employeeTable" class="display" style="width:100%">
+    <thead>
+      <tr>
+        <th>PLU</th>
+        <th>Product Code</th>
+        <th>Product Name</th>
+        <th>Price</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>2</td>
+            <td>807365</td>
+            <td>AVOCADO</td>
+            <td>0.89</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>701238</td>
+            <td>BAG ECO LOOP</td>
+            <td>0.30</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>808368</td>
+            <td>GRAPEFRUIT</td>
+            <td>0.49</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>21345</td>
+            <td>BAG COMPOSTABLE</td>
+            <td>0.10</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>810989</td>
+            <td>PEPPERS RED LOOSE</td>
+            <td>0.69</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>60170</td>
+            <td>SWEDE</td>
+            <td>0.62</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td>822684</td>
+            <td>HONEYDEW MELON</td>
+            <td>1.89</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>835877</td>
+            <td>ECO CARRIER BAG</td>
+            <td>0.30</td>
+        </tr>
+        <tr>
+            <td>10</td>
+            <td>51029</td>
+            <td>CAULIFLOWER</td>
+            <td>0.89</td>
+        </tr>
+        <tr>
+            <td>11</td>
+            <td>78509</td>
+            <td>CABBAGE SAVOY</td>
+            <td>0.75</td>
+        </tr>
+        <tr>
+            <td>12</td>
+            <td>842706</td>
+            <td>REUSEABLE BAG</td>
+            <td>0.65</td>
+        </tr>
+        <tr>
+            <td>13</td>
+            <td>827767</td>
+            <td>COCONUT</td>
+            <td>0.89</td>
+        </tr>
+        <tr>
+            <td>15</td>
+            <td>841660</td>
+            <td>PAPAYA</td>
+            <td>1.49</td>
+        </tr>
+        <tr>
+            <td>16</td>
+            <td>807306</td>
+            <td>GALIA MELON</td>
+            <td>1.79</td>
+        </tr>
+        <tr>
+            <td>17</td>
+            <td>836859</td>
+            <td>BANANAS LOOSE</td>
+            <td>0.16</td>
+        </tr>
+        <tr>
+            <td>19</td>
+            <td>807450</td>
+            <td>PINEAPPLE</td>
+            <td>0.99</td>
+        </tr>
+        <tr>
+            <td>21</td>
+            <td>830295</td>
+            <td>AUBERGINE EACH</td>
+            <td>0.95</td>
+        </tr>
+        <tr>
+            <td>22</td>
+            <td>700993</td>
+            <td>BAKING POTATO</td>
+            <td>0.24</td>
+        </tr>
+        <tr>
+            <td>23</td>
+            <td>810320</td>
+            <td>CUCUMBER</td>
+            <td>0.89</td>
+        </tr>
+        <tr>
+            <td>24</td>
+            <td>845472</td>
+            <td>SPRING ONIONS</td>
+            <td>0.69</td>
+        </tr>
+        <tr>
+            <td>25</td>
+            <td>842998</td>
+            <td>BEEF TOMATO</td>
+            <td>0.69</td>
+        </tr>
+        <tr>
+            <td>26</td>
+            <td>833418</td>
+            <td>POMEGRANATE LOOSE</td>
+            <td>1.15</td>
+        </tr>
+        <tr>
+            <td>27</td>
+            <td>54829</td>
+            <td>WHITE/RED CABBAGE</td>
+            <td>0.75</td>
+        </tr>
+        <tr>
+            <td>30</td>
+            <td>807341</td>
+            <td>WATERMELON</td>
+            <td>3.29</td>
+        </tr>
+        <tr>
+            <td>32</td>
+            <td>818340</td>
+            <td>ASPARAGUS BUNDLE</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>33</td>
+            <td>821235</td>
+            <td>SWEET POTATO LOOSE</td>
+            <td>0.69</td>
+        </tr>
+        <tr>
+            <td>34</td>
+            <td>77866</td>
+            <td>APPLES BRAMLEY</td>
+            <td>0.59</td>
+        </tr>
+        <tr>
+            <td>37</td>
+            <td>810043</td>
+            <td>AVOCADO XL LOOSE</td>
+            <td>1.39</td>
+        </tr>
+        <tr>
+            <td>39</td>
+            <td>819957</td>
+            <td>BROCCOLI</td>
+            <td>0.79</td>
+        </tr>
+        <tr>
+            <td>40</td>
+            <td>819934</td>
+            <td>ICEBERG LETTUCE</td>
+            <td>0.89</td>
+        </tr>
+        <tr>
+            <td>43</td>
+            <td>807344</td>
+            <td>MANGO LOOSE</td>
+            <td>0.89</td>
+        </tr>
+        <tr>
+            <td>45</td>
+            <td>87191</td>
+            <td>BUTTERNUT SQUASH</td>
+            <td>1.09</td>
+        </tr>
+        <tr>
+            <td>46</td>
+            <td>725420</td>
+            <td>APPLE BRAMLEY SMALL</td>
+            <td>0.42</td>
+        </tr>
+        <tr>
+            <td>49</td>
+            <td>730015</td>
+            <td>BUNCHED BEETROOT</td>
+            <td>1.39</td>
+        </tr>
+        <tr>
+            <td>51</td>
+            <td>705857</td>
+            <td>CORN LOOSE</td>
+            <td>0.49</td>
+        </tr>
+        <tr>
+            <td>53</td>
+            <td>741861</td>
+            <td>GARLIC XL EACH</td>
+            <td>0.37</td>
+        </tr>
+        <tr>
+            <td>63</td>
+            <td>829073</td>
+            <td>LARGE CUCUMBER</td>
+            <td>0.99</td>
+        </tr>
+        <tr>
+            <td>00</td>
+            <td>716</td>
+            <td>WATER 6 PACK</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>00</td>
+            <td>44203</td>
+            <td>WATER 12 PACK SMALL</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>00</td>
+            <td>6189</td>
+            <td>SPARKLING WATER 4 PACK</td>
+            <td>0.00</td>
+        </tr>
+    </tbody>
+  </table>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <!-- Initialization -->
-    <script>
-        $(document).ready(function () {
-            $('#employeeTable').DataTable({
-                responsive: true,
-                pageLength: 10,
-            });
-        });
-    </script>
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <!-- Initialization -->
+  <script>
+    let table;
+
+    $(document).ready(function () {
+      table = $('#employeeTable').DataTable({
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [10, 20, 50, 100],
+        order: [[2, 'asc']],
+        dom: '<"top-area">t<"bottom"lpi>' // custom search in top-area, controls in bottom
+      });
+
+      // Move custom search bar into the DataTables top-area container
+      $('div.top-area').prepend($('#customSearch'));
+
+      // Live search trigger
+      $('#customSearch').on('keyup', function () {
+        table.search(this.value).draw();
+      });
+    });
+  </script>
 
 </body>
 
