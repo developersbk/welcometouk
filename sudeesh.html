@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Albrecht Discounts</title>
+  <title>Sudeesh's List</title>
 
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
@@ -27,7 +27,23 @@
       color: white;
     }
 
-    input, select {
+    .dataTables_length select {
+      background-color: #1e293b;
+      color: rgb(0, 0, 0);
+      border: 1px solid #374151;
+      padding: 6px;
+      border-radius: 4px;
+
+    }
+
+    .dataTables_wrapper .dataTables_length select {
+      background-color: #1e293b;
+      color: white;
+    }
+
+
+    input,
+    select {
       background-color: #1e293b;
       color: white;
       border: 1px solid #374151;
@@ -43,8 +59,6 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      margin-right: 8px;
-      margin-bottom: 10px;
     }
 
     #customSearch {
@@ -53,13 +67,11 @@
       margin-bottom: 10px;
     }
 
-    /* Hide actions column */
     .actions-hidden th:last-child,
     .actions-hidden td:last-child {
       display: none;
     }
 
-    /* Modal styling */
     #productModal {
       display: none;
       position: fixed;
@@ -82,6 +94,27 @@
     #productModal h3 {
       margin-top: 0;
     }
+
+    div.dt-buttons .pdf-button {
+      background-color: #2563eb !important;
+      color: white !important;
+      padding: 8px 12px !important;
+      border: none !important;
+      border-radius: 4px !important;
+      cursor: pointer !important;
+      font-size: 14px;
+      margin-left: auto;
+      /* Optional: Aligns to right if container allows */
+    }
+
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
   </style>
 </head>
 
@@ -90,10 +123,12 @@
   <h2>Albrecht Discounts's Product List</h2>
   <input type="text" id="customSearch" placeholder="Search table..." />
 
-  <button class="pdf-button" onclick="openModal()">Add Product</button>
-  <button class="pdf-button" onclick="toggleActions()">Show Edit/Delete</button>
+  <div id="topButtons" class="button-row">
+    <button class="pdf-button" onclick="openModal()">Add Product</button>
+    <button class="pdf-button" onclick="toggleActions()">Show Edit/Delete</button>
+    <div id="pdfExportContainer"></div>
+  </div>
 
-  <!-- Add Product Modal -->
   <div id="productModal">
     <div id="productModalContent">
       <h3>Add New Product</h3>
@@ -133,7 +168,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <script>
-    // 🔥 Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyAku-atS5H_eCz1L50uC-1M8K34iHzy0_E",
       authDomain: "albrecht-discounts.firebaseapp.com",
@@ -152,7 +186,8 @@
 
     $(document).ready(function () {
       table = $('#employeeTable').DataTable({
-        dom: '<"top-area">t<"bottom"Bpl>',
+        dom: 't<"bottom"lp>',
+        order: [[2, 'asc']], // Default sort by Product Name
         buttons: [
           {
             extend: 'pdfHtml5',
@@ -169,10 +204,13 @@
         }]
       });
 
-      $('div.top-area').prepend($('#customSearch'));
+      // Custom search
       $('#customSearch').on('keyup', function () {
         table.search(this.value).draw();
       });
+
+      // Move Export PDF button to top right
+      table.buttons().container().appendTo('#pdfExportContainer');
 
       loadData();
     });
@@ -287,7 +325,6 @@
       });
     }
 
-    // Modal control
     function openModal() {
       document.getElementById('productModal').style.display = 'block';
     }
@@ -303,4 +340,5 @@
     }
   </script>
 </body>
+
 </html>
