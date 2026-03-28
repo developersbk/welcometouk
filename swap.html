@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shift Swap Checker</title>
+  <link rel="stylesheet" href="swap-style.css">
+</head>
+<body>
+  <div class="container" id="mainPage">
+    <div class="topbar">
+      <a href="sudeesh.html">Product List</a>
+      <a href="swap.html">Swap Checker</a>
+      <a href="employees.html">Employee Setup</a>
+    </div>
+
+    <div class="card">
+      <h1>Shift Swap Checker</h1>
+      <p class="small">Employee names now come from Firebase, using the same project as your product list.</p>
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Your name</label>
+          <select id="myName"></select>
+        </div>
+        <div class="field">
+          <label>Swap day date</label>
+          <input type="date" id="swapDate">
+        </div>
+      </div>
+      <div id="dateHint" class="small" style="margin-top:10px"></div>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="card">
+        <h3 data-title="prev">Previous Day</h3>
+        <div data-entries="prev"></div>
+        <button type="button" class="btn add-entry-btn" data-day="prev">+ Add row</button>
+      </div>
+
+      <div class="card">
+        <h3 data-title="current">Swap Day</h3>
+        <p class="small">Your own shift must be entered here.</p>
+        <div data-entries="current"></div>
+        <button type="button" class="btn add-entry-btn" data-day="current">+ Add row</button>
+      </div>
+
+      <div class="card">
+        <h3 data-title="next">Next Day</h3>
+        <div data-entries="next"></div>
+        <button type="button" class="btn add-entry-btn" data-day="next">+ Add row</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="inline">
+        <button type="button" class="btn primary" id="runCheckBtn">Find Employees Who Can Swap</button>
+        <button type="button" class="btn ghost" id="clearScheduleBtn">Clear day tables</button>
+      </div>
+      <p class="small" style="margin-top:10px">Day tables still reset on reload. Employee list is now shared through Firebase.</p>
+    </div>
+
+    <div id="results"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="firebase-shared.js"></script>
+  <script src="swap-app.js"></script>
+</body>
+</html>

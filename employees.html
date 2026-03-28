@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Setup</title>
+  <link rel="stylesheet" href="swap-style.css">
+</head>
+<body>
+  <div class="container" id="employeesPage">
+    <div class="topbar">
+      <a href="sudeesh.html">Product List</a>
+      <a href="swap.html">Swap Checker</a>
+      <a href="employees.html">Employee Setup</a>
+    </div>
+
+    <div class="card">
+      <h1>Employee Setup</h1>
+      <p class="small">This page now saves employee data to the same Firebase project as your product list.</p>
+      <form id="employeeForm">
+        <div class="grid grid-2">
+          <div class="field">
+            <label>Name</label>
+            <input id="empName" type="text" placeholder="Employee name">
+          </div>
+          <div class="field">
+            <label>Contact</label>
+            <input id="empContact" type="text" placeholder="Phone or contact note">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Shift condition</label>
+          <select id="empShiftType">
+            <option value="any">Any shift</option>
+            <option value="am">AM only</option>
+            <option value="pm">PM only</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Allowed days</label>
+          <div id="daysCheckboxes" class="days-list"></div>
+          <p class="small">Leave all unchecked if the employee can work any day.</p>
+        </div>
+
+        <div class="inline">
+          <button type="submit" class="btn primary">Save employee</button>
+          <button type="button" class="btn" id="exportEmployeesBtn">Export employees</button>
+          <label class="btn" for="importEmployeesInput" style="display:inline-block">Import employees</label>
+          <input id="importEmployeesInput" type="file" accept=".json" style="display:none">
+        </div>
+      </form>
+
+      <div id="employeeMessage"></div>
+    </div>
+
+    <div class="card">
+      <h2>Saved employees</h2>
+      <div id="employeeList" class="table-like"></div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="firebase-shared.js"></script>
+  <script src="employees-page.js"></script>
+</body>
+</html>

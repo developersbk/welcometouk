@@ -15,6 +15,48 @@
       font-family: 'Segoe UI', sans-serif;
       color: white;
       padding: 20px;
+      margin: 0;
+    }
+
+    .page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    .nav-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .nav-link,
+    .pdf-button,
+    table button {
+      background-color: #2563eb;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .nav-link.secondary {
+      background-color: #334155;
+    }
+
+    .panel {
+      background: #111827;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
     }
 
     table.dataTable {
@@ -33,14 +75,12 @@
       border: 1px solid #374151;
       padding: 6px;
       border-radius: 4px;
-
     }
 
     .dataTables_wrapper .dataTables_length select {
       background-color: #1e293b;
       color: white;
     }
-
 
     input,
     select {
@@ -52,19 +92,11 @@
       margin: 4px;
     }
 
-    .pdf-button {
-      background-color: #2563eb;
-      color: white;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
     #customSearch {
       width: 100%;
       padding: 10px;
       margin-bottom: 10px;
+      box-sizing: border-box;
     }
 
     .actions-hidden th:last-child,
@@ -81,14 +113,17 @@
       height: 100%;
       background: rgba(0, 0, 0, 0.6);
       z-index: 9999;
+      padding: 16px;
+      box-sizing: border-box;
     }
 
     #productModalContent {
       background: #1e293b;
-      margin: 10% auto;
+      margin: 7% auto;
       padding: 20px;
-      width: 300px;
+      width: min(360px, 100%);
       border-radius: 8px;
+      box-sizing: border-box;
     }
 
     #productModal h3 {
@@ -104,9 +139,7 @@
       cursor: pointer !important;
       font-size: 14px;
       margin-left: auto;
-      /* Optional: Aligns to right if container allows */
     }
-
 
     .button-row {
       display: flex;
@@ -115,47 +148,87 @@
       align-items: center;
       margin-bottom: 12px;
     }
+
+    .hint {
+      color: #cbd5e1;
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 14px;
+      }
+
+      .nav-row,
+      .button-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .nav-link,
+      .pdf-button,
+      table button {
+        width: 100%;
+        text-align: center;
+      }
+
+      #productModalContent {
+        margin: 24% auto;
+      }
+    }
   </style>
 </head>
 
 <body>
-
-  <h2>Albrecht Discounts's Product List</h2>
-  <input type="text" id="customSearch" placeholder="Search table..." />
-
-  <div id="topButtons" class="button-row">
-    <button class="pdf-button" onclick="openModal()">Add Product</button>
-    <button class="pdf-button" onclick="toggleActions()">Show Edit/Delete</button>
-    <div id="pdfExportContainer"></div>
-  </div>
-
-  <div id="productModal">
-    <div id="productModalContent">
-      <h3>Add New Product</h3>
-      <input id="newPLU" placeholder="PLU" />
-      <input id="newCode" placeholder="Product Code" />
-      <input id="newName" placeholder="Product Name" />
-      <input id="newPrice" placeholder="Price" />
-      <br><br>
-      <button class="pdf-button" onclick="addRow()">Add</button>
-      <button class="pdf-button" onclick="closeModal()">Cancel</button>
+  <div class="page-wrap">
+    <div class="nav-row">
+      <a class="nav-link" href="sudeesh.html">Product List</a>
+      <a class="nav-link secondary" href="swap.html">Swap Checker</a>
+      <a class="nav-link secondary" href="employees.html">Employee Setup</a>
     </div>
+
+    <div class="panel">
+      <h2>Albrecht Discounts's Product List</h2>
+      <p class="hint">Product list, swap checker, and employee setup are now linked together. Employee data is shared through the same Firebase project.</p>
+    </div>
+
+    <input type="text" id="customSearch" placeholder="Search table..." />
+
+    <div id="topButtons" class="button-row">
+      <button class="pdf-button" onclick="openModal()">Add Product</button>
+      <button class="pdf-button" onclick="toggleActions()">Show Edit/Delete</button>
+      <div id="pdfExportContainer"></div>
+    </div>
+
+    <div id="productModal">
+      <div id="productModalContent">
+        <h3>Add New Product</h3>
+        <input id="newPLU" placeholder="PLU" />
+        <input id="newCode" placeholder="Product Code" />
+        <input id="newName" placeholder="Product Name" />
+        <input id="newPrice" placeholder="Price" />
+        <br><br>
+        <button class="pdf-button" onclick="addRow()">Add</button>
+        <button class="pdf-button" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+
+    <table id="employeeTable" class="display actions-hidden" style="width:100%">
+      <thead>
+        <tr>
+          <th>PLU</th>
+          <th>Product Code</th>
+          <th>Product Name</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
-  <table id="employeeTable" class="display actions-hidden" style="width:100%">
-    <thead>
-      <tr>
-        <th>PLU</th>
-        <th>Product Code</th>
-        <th>Product Name</th>
-        <th>Price</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <!-- Libraries -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
@@ -163,7 +236,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
@@ -187,7 +259,7 @@
     $(document).ready(function () {
       table = $('#employeeTable').DataTable({
         dom: 't<"bottom"lp>',
-        order: [[2, 'asc']], // Default sort by Product Name
+        order: [[2, 'asc']],
         buttons: [
           {
             extend: 'pdfHtml5',
@@ -204,14 +276,11 @@
         }]
       });
 
-      // Custom search
       $('#customSearch').on('keyup', function () {
         table.search(this.value).draw();
       });
 
-      // Move Export PDF button to top right
       table.buttons().container().appendTo('#pdfExportContainer');
-
       loadData();
     });
 
@@ -258,10 +327,10 @@
 
     function addToTable(data, id) {
       const rowNode = table.row.add([
-        data.plu,
-        data.code,
-        data.name,
-        data.price,
+        data.plu || "",
+        data.code || "",
+        data.name || "",
+        data.price || "",
         `<button onclick="editRow('${id}', this)">Edit</button>
          <button onclick="deleteRow('${id}')">Delete</button>`
       ]).draw().node();
@@ -273,10 +342,10 @@
       table.rows().every(function () {
         if (this.node().dataset.id === id) {
           this.data([
-            data.plu,
-            data.code,
-            data.name,
-            data.price,
+            data.plu || "",
+            data.code || "",
+            data.name || "",
+            data.price || "",
             `<button onclick="editRow('${id}', this)">Edit</button>
              <button onclick="deleteRow('${id}')">Delete</button>`
           ]).draw();
