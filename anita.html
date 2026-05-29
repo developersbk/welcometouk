@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anita</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPGdhPK4P4XbILtJNh8ZjmtYXctg0Z9/RhnfnyVasW2M6gzqNfB5J1vJAqVhJ/7JdI6K8K9QE3/kV06QQ8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    :root {
+      --border: #111;
+      --light: #f2f2f2;
+      --button: #1f2937;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #e5e7eb;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #111;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      padding: 14px;
+      background: #fff;
+      border-bottom: 1px solid #d1d5db;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    button {
+      border: 0;
+      background: var(--button);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.secondary { background: #374151; }
+
+    .page {
+      width: 287mm;
+      min-height: 200mm;
+      margin: 10mm auto;
+      background: #fff;
+      padding: 7mm;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.16);
+    }
+
+    #planner {
+      width: 100%;
+      height: 186mm;
+      display: flex;
+      flex-direction: column;
+      gap: 5mm;
+    }
+
+    .top-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8mm;
+    }
+
+    .field-line {
+      display: grid;
+      grid-template-columns: 30mm 1fr;
+      align-items: center;
+      gap: 4mm;
+      margin-bottom: 3mm;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .field-line input {
+      height: 10mm;
+      border: 1.5px solid var(--border);
+      font-size: 15px;
+      padding: 0 8px;
+      background: #fff;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.95fr 1fr 0.75fr;
+      gap: 5mm;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .section {
+      border: 1.6px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .section-title {
+      text-align: center;
+      font-weight: 800;
+      font-size: 15px;
+      padding: 5px 4px;
+      background: var(--light);
+      border-bottom: 1.6px solid var(--border);
+      letter-spacing: 0.2px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th, td {
+      border: 1.2px solid var(--border);
+      padding: 3px;
+      height: 10.2mm;
+      vertical-align: middle;
+      font-size: 13px;
+    }
+
+    th { background: #fafafa; font-weight: 800; }
+
+    input, textarea {
+      width: 100%;
+      border: 0;
+      outline: none;
+      font-family: inherit;
+      background: transparent;
+      resize: none;
+    }
+
+    .cell-input {
+      height: 8.5mm;
+      font-size: 13px;
+      padding: 1px 3px;
+    }
+
+    .tills-table th:first-child,
+    .tills-table td:first-child {
+      width: 12mm;
+      text-align: center;
+      font-weight: 800;
+      background: #fafafa;
+    }
+
+    .delivery-body {
+      display: grid;
+      grid-template-rows: repeat(3, 1fr);
+      flex: 1;
+    }
+
+    .delivery-block {
+      border-bottom: 1.2px solid var(--border);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 28mm;
+    }
+
+    .delivery-block:last-child { border-bottom: 0; }
+
+    .delivery-label {
+      text-align: center;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 4px;
+      background: #fafafa;
+      border-bottom: 1.2px solid var(--border);
+    }
+
+    .delivery-block textarea {
+      min-height: 100%;
+      padding: 5px;
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .carding-row, .datecheck-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      border-bottom: 1.2px solid var(--border);
+      min-height: 10.2mm;
+    }
+
+    .carding-row:last-child, .datecheck-row:last-child { border-bottom: 0; }
+
+    .carding-label, .datecheck-label {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 5px 1px;
+    }
+
+    .carding-row input, .datecheck-row input {
+      height: 6.5mm;
+      padding: 0 5px 3px;
+      font-size: 13px;
+    }
+
+    .datecheck-row { min-height: 27mm; }
+
+    .breaks-section {
+      border: 1.6px solid var(--border);
+      height: 55mm;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .breaks-title {
+      font-weight: 800;
+      padding: 4px 7px;
+      font-size: 15px;
+      background: var(--light);
+      border-bottom: 1.6px solid var(--border);
+    }
+
+    .breaks-table th:nth-child(1), .breaks-table td:nth-child(1) { width: 42mm; }
+    .breaks-table th:nth-child(2), .breaks-table td:nth-child(2) { width: auto; }
+    .breaks-table th { height: 8mm; }
+    .breaks-table td { height: 8.2mm; }
+
+    .notes-input { height: 7mm; padding: 1px 4px; font-size: 12.5px; }
+
+    @media print {
+      body { background: #fff; }
+      .toolbar { display: none !important; }
+      .page {
+        width: auto;
+        min-height: auto;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+      }
+      #planner {
+        height: 194mm;
+        gap: 4mm;
+      }
+      input, textarea { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .section-title, th, .breaks-title, .delivery-label { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
+    @page {
+      size: A4 landscape;
+      margin: 7mm;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button onclick="window.print()">Print</button>
+    <button class="secondary" onclick="exportPDF()">Export as PDF</button>
+  </div>
+
+  <main class="page">
+    <form id="planner" autocomplete="off">
+      <section class="top-row">
+        <div>
+          <label class="field-line"><span>Date</span><input id="dateField" name="date" type="text" /></label>
+          <label class="field-line"><span>Manager</span><input name="manager" type="text" /></label>
+        </div>
+        <div></div>
+      </section>
+
+      <section class="main-grid">
+        <div class="section">
+          <div class="section-title">Tills</div>
+          <table class="tills-table">
+            <thead>
+              <tr><th></th><th>1</th><th>6</th><th>7</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
+              <tr><td>2</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
+              <tr><td>3</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
+              <tr><td>4</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
+              <tr><td>5</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
+              <tr><td>6</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
+              <tr><td>7</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Delivery</div>
+          <div class="delivery-body">
+            <div class="delivery-block">
+              <div class="delivery-label">Ambient Backstock</div>
+              <textarea></textarea>
+            </div>
+            <div class="delivery-block">
+              <div class="delivery-label">Freezer</div>
+              <textarea></textarea>
+            </div>
+            <div class="delivery-block">
+              <div class="delivery-label">Chiller</div>
+              <textarea></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Carding</div>
+          <div class="carding-row"><div class="carding-label">1- Aisle 5</div><input /></div>
+          <div class="carding-row"><div class="carding-label">2- Aisle 3&amp;4</div><input /></div>
+          <div class="carding-row"><div class="carding-label">3- Aisle 2</div><input /></div>
+          <div class="carding-row"><div class="carding-label">4- Chiller</div><input /></div>
+          <div class="carding-row"><div class="carding-label">5- Alcohol</div><input /></div>
+          <div class="carding-row"><div class="carding-label">6- Produce</div><input /></div>
+          <div class="carding-row"><div class="carding-label">7-Specials(4)</div><input /></div>
+          <div class="carding-row"><div class="carding-label">8-Specials(3)</div><input /></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Date Check</div>
+          <div class="datecheck-row"><div class="datecheck-label">chiller</div><input /></div>
+          <div class="datecheck-row"><div class="datecheck-label">Produce</div><input /></div>
+          <div class="datecheck-row"><div class="datecheck-label">Bread</div><input /></div>
+        </div>
+      </section>
+
+      <section class="breaks-section">
+        <div class="breaks-title">Breaks</div>
+        <table class="breaks-table">
+          <thead><tr><th>Time</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><input class="notes-input" /></td><td><input class="notes-input" /></td></tr>
+            <tr><td><input class="notes-input" /></td><td><input class="notes-input" /></td></tr>
+            <tr><td><input class="notes-input" /></td><td><input class="notes-input" /></td></tr>
+            <tr><td><input class="notes-input" /></td><td><input class="notes-input" /></td></tr>
+            <tr><td><input class="notes-input" /></td><td><input class="notes-input" /></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </form>
+  </main>
+
+  <script>
+    function setCurrentDate() {
+      const dateField = document.getElementById('dateField');
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, '0');
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const yyyy = now.getFullYear();
+      dateField.value = `${dd}/${mm}/${yyyy}`;
+    }
+
+    function exportPDF() {
+      const element = document.querySelector('.page');
+      const options = {
+        margin: 0,
+        filename: 'anita-planner.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+        pagebreak: { mode: ['avoid-all'] }
+      };
+
+      if (window.html2pdf) {
+        html2pdf().set(options).from(element).save();
+      } else {
+        window.print();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', setCurrentDate);
+  </script>
+</body>
+</html>
