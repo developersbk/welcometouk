@@ -3,113 +3,242 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anita</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPGdhPK4P4XbILtJNh8ZjmtYXctg0Z9/RhnfnyVasW2M6gzqNfB5J1vJAqVhJ/7JdI6K8K9QE3/kV06QQ8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <title>Anita Planner</title>
+
+  <!-- Export to PDF library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+   
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    /*
+      Fallback loader because some browsers reject CDN integrity if the CDN changes.
+      The page still prints even if html2pdf fails to load.
+    */
+    window.addEventListener("error", function (e) {
+      const target = e.target || {};
+      if (target.tagName === "SCRIPT" && String(target.src).includes("html2pdf")) {
+        const s = document.createElement("script");
+        s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+        document.head.appendChild(s);
+      }
+    }, true);
+  </script>
+
+
+  <!-- Firebase Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+
   <style>
     :root {
-      --border: #111;
-      --light: #f2f2f2;
+      --ink: #111827;
+      --line: #111827;
+      --soft: #f3f4f6;
+      --page: #ffffff;
+      --bg: #e5e7eb;
       --button: #1f2937;
+      --button2: #374151;
+      --danger: #991b1b;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
+    html,
     body {
       margin: 0;
-      background: #e5e7eb;
+      padding: 0;
       font-family: Arial, Helvetica, sans-serif;
-      color: #111;
+      color: var(--ink);
+      background: var(--bg);
     }
 
     .toolbar {
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
       justify-content: center;
       align-items: center;
-      padding: 14px;
+      padding: 12px;
       background: #fff;
       border-bottom: 1px solid #d1d5db;
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 100;
     }
 
-    button {
+    button,
+    .nav-btn {
+      appearance: none;
       border: 0;
       background: var(--button);
       color: #fff;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 14px;
+      padding: 9px 14px;
+      border-radius: 7px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
     }
 
-    button.secondary { background: #374151; }
+    .nav-btn.secondary,
+    button.secondary {
+      background: var(--button2);
+    }
+
+    button.danger {
+      background: var(--danger);
+    }
+
+
+    .sync-status {
+      font-size: 12px;
+      font-weight: 700;
+      color: #374151;
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
+      padding: 8px 10px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
 
     .page {
-      width: 287mm;
-      min-height: 200mm;
-      margin: 10mm auto;
-      background: #fff;
+      width: 210mm;
+      min-height: 297mm;
+      margin: 8mm auto;
+      background: var(--page);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.16);
       padding: 7mm;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.16);
+      overflow: hidden;
     }
 
-    #planner {
-      width: 100%;
-      height: 186mm;
+    .planner-sheet {
+      width: 196mm;
+      height: 283mm;
       display: flex;
       flex-direction: column;
-      gap: 5mm;
+      gap: 3.2mm;
     }
 
-    .top-row {
+    .title-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8mm;
-    }
-
-    .field-line {
-      display: grid;
-      grid-template-columns: 30mm 1fr;
+      grid-template-columns: 1fr auto;
       align-items: center;
-      gap: 4mm;
-      margin-bottom: 3mm;
+      gap: 5mm;
+      border: 1.5px solid var(--line);
+      padding: 2mm 3mm;
+      background: var(--soft);
+    }
+
+    h1 {
+      margin: 0;
       font-size: 16px;
+      line-height: 1.1;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+    }
+
+    .tiny-note {
+      font-size: 10px;
+      line-height: 1.2;
       font-weight: 700;
     }
 
-    .field-line input {
-      height: 10mm;
-      border: 1.5px solid var(--border);
-      font-size: 15px;
-      padding: 0 8px;
+    .top-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4mm;
+    }
+
+    .field {
+      display: grid;
+      grid-template-columns: 26mm 1fr;
+      align-items: center;
+      border: 1.4px solid var(--line);
+      min-height: 9mm;
       background: #fff;
     }
 
-    .main-grid {
+    .field span {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding: 0 2mm;
+      font-size: 12px;
+      font-weight: 800;
+      background: var(--soft);
+      border-right: 1.4px solid var(--line);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      font-family: inherit;
+      color: var(--ink);
+      font-size: 11px;
+      min-width: 0;
+    }
+
+    input,
+    select {
+      height: 100%;
+      padding: 0 2mm;
+    }
+
+    textarea {
+      resize: none;
+      padding: 1.5mm 2mm;
+      line-height: 1.25;
+    }
+
+    .layout-grid {
       display: grid;
-      grid-template-columns: 1.15fr 0.95fr 1fr 0.75fr;
-      gap: 5mm;
-      flex: 1 1 auto;
+      grid-template-columns: 1fr 1fr;
+      gap: 3.2mm;
+      min-height: 0;
+    }
+
+    .left-stack,
+    .right-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 3.2mm;
       min-height: 0;
     }
 
     .section {
-      border: 1.6px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .section-title {
+      margin: 0;
+      padding: 1.7mm 2mm;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 900;
       text-align: center;
-      font-weight: 800;
-      font-size: 15px;
-      padding: 5px 4px;
-      background: var(--light);
-      border-bottom: 1.6px solid var(--border);
+      background: var(--soft);
+      border-bottom: 1.5px solid var(--line);
+      text-transform: uppercase;
       letter-spacing: 0.2px;
     }
 
@@ -119,257 +248,713 @@
       table-layout: fixed;
     }
 
-    th, td {
-      border: 1.2px solid var(--border);
-      padding: 3px;
-      height: 10.2mm;
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 0;
+      height: 7.8mm;
       vertical-align: middle;
-      font-size: 13px;
+      font-size: 10.5px;
+      overflow: hidden;
     }
 
-    th { background: #fafafa; font-weight: 800; }
-
-    input, textarea {
-      width: 100%;
-      border: 0;
-      outline: none;
-      font-family: inherit;
-      background: transparent;
-      resize: none;
-    }
-
-    .cell-input {
-      height: 8.5mm;
-      font-size: 13px;
-      padding: 1px 3px;
-    }
-
-    .tills-table th:first-child,
-    .tills-table td:first-child {
-      width: 12mm;
+    th {
+      background: #fafafa;
+      font-weight: 900;
+      padding: 1mm;
       text-align: center;
+    }
+
+    td.label-cell {
+      background: #fff;
       font-weight: 800;
+      padding: 0 1.5mm;
+      white-space: nowrap;
+    }
+
+    td.num-cell {
+      width: 9mm;
+      text-align: center;
+      font-weight: 900;
       background: #fafafa;
     }
 
-    .delivery-body {
-      display: grid;
-      grid-template-rows: repeat(3, 1fr);
-      flex: 1;
+    .blank-cell {
+      background: #fff;
     }
 
-    .delivery-block {
-      border-bottom: 1.2px solid var(--border);
-      display: grid;
-      grid-template-rows: auto 1fr;
-      min-height: 28mm;
+    .assigned-cell {
+      background: #fff;
     }
 
-    .delivery-block:last-child { border-bottom: 0; }
+    .assigned-cell select,
+    .assigned-cell input {
+      font-size: 10.5px;
+    }
 
-    .delivery-label {
+    .check-cell {
+      width: 8mm;
       text-align: center;
-      font-weight: 800;
-      font-size: 13px;
-      padding: 4px;
-      background: #fafafa;
-      border-bottom: 1.2px solid var(--border);
     }
 
-    .delivery-block textarea {
-      min-height: 100%;
-      padding: 5px;
-      font-size: 13px;
-      line-height: 1.25;
+    .check-cell input {
+      width: 4.5mm;
+      height: 4.5mm;
+      accent-color: #111827;
     }
 
-    .carding-row, .datecheck-row {
+    .reworks th:nth-child(1),
+    .carding th:nth-child(1),
+    .date-check th:nth-child(1),
+    .putbacks th:nth-child(1) {
+      width: 52mm;
+    }
+
+    .tills th:nth-child(1) {
+      width: 42mm;
+    }
+
+    .breaks th:nth-child(1) {
+      width: 43%;
+    }
+
+    .breaks th:nth-child(2),
+    .breaks th:nth-child(3) {
+      width: 28.5%;
+    }
+
+    .setup-page {
+      width: min(900px, calc(100% - 24px));
+      margin: 20px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      padding: 22px;
+    }
+
+    .setup-page h2 {
+      margin: 0 0 6px;
+      font-size: 22px;
+    }
+
+    .setup-page p {
+      margin: 0 0 18px;
+      color: #4b5563;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .setup-form {
       display: grid;
-      grid-template-columns: 1fr;
-      border-bottom: 1.2px solid var(--border);
-      min-height: 10.2mm;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-bottom: 16px;
     }
 
-    .carding-row:last-child, .datecheck-row:last-child { border-bottom: 0; }
+    .setup-form input {
+      border: 1px solid #cbd5e1;
+      min-height: 40px;
+      border-radius: 8px;
+      padding: 0 12px;
+      font-size: 14px;
+      background: #fff;
+    }
 
-    .carding-label, .datecheck-label {
-      font-size: 13px;
+    .name-list {
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
       font-weight: 700;
-      padding: 4px 5px 1px;
     }
 
-    .carding-row input, .datecheck-row input {
-      height: 6.5mm;
-      padding: 0 5px 3px;
-      font-size: 13px;
+    .name-row:last-child {
+      border-bottom: 0;
     }
 
-    .datecheck-row { min-height: 27mm; }
-
-    .breaks-section {
-      border: 1.6px solid var(--border);
-      height: 55mm;
-      display: flex;
-      flex-direction: column;
+    .empty-state {
+      padding: 16px;
+      color: #6b7280;
+      font-size: 14px;
+      background: #f9fafb;
     }
 
-    .breaks-title {
-      font-weight: 800;
-      padding: 4px 7px;
-      font-size: 15px;
-      background: var(--light);
-      border-bottom: 1.6px solid var(--border);
+    @media (max-width: 900px) {
+      .page {
+        width: calc(100% - 20px);
+        min-height: auto;
+        padding: 10px;
+        overflow-x: auto;
+      }
+
+      .planner-sheet {
+        width: 196mm;
+        height: auto;
+        min-height: 283mm;
+      }
+
+      .toolbar {
+        position: static;
+      }
     }
-
-    .breaks-table th:nth-child(1), .breaks-table td:nth-child(1) { width: 42mm; }
-    .breaks-table th:nth-child(2), .breaks-table td:nth-child(2) { width: auto; }
-    .breaks-table th { height: 8mm; }
-    .breaks-table td { height: 8.2mm; }
-
-    .notes-input { height: 7mm; padding: 1px 4px; font-size: 12.5px; }
 
     @media print {
-      body { background: #fff; }
-      .toolbar { display: none !important; }
+      html,
+      body {
+        width: 210mm;
+        height: 297mm;
+        background: #fff !important;
+        overflow: hidden;
+      }
+
+      .toolbar,
+      .setup-page,
+      .screen:not(#plannerScreen) {
+        display: none !important;
+      }
+
+      #plannerScreen {
+        display: block !important;
+      }
+
       .page {
-        width: auto;
-        min-height: auto;
+        width: 210mm;
+        height: 297mm;
         margin: 0;
-        padding: 0;
+        padding: 6mm;
         box-shadow: none;
+        overflow: hidden;
       }
-      #planner {
-        height: 194mm;
-        gap: 4mm;
+
+      .planner-sheet {
+        width: 198mm;
+        height: 285mm;
+        gap: 2.7mm;
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
-      input, textarea { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .section-title, th, .breaks-title, .delivery-label { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      .title-row,
+      .field span,
+      .section-title,
+      th {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      select {
+        appearance: none;
+        -webkit-appearance: none;
+        color: #111827;
+      }
+
+      button {
+        display: none !important;
+      }
     }
 
     @page {
-      size: A4 landscape;
-      margin: 7mm;
+      size: A4 portrait;
+      margin: 0;
     }
   </style>
 </head>
+
 <body>
-  <div class="toolbar">
-    <button onclick="window.print()">Print</button>
-    <button class="secondary" onclick="exportPDF()">Export as PDF</button>
-  </div>
+  <nav class="toolbar">
+    <button type="button" onclick="showScreen('plannerScreen')">Planner</button>
+    <button type="button" class="secondary" onclick="showScreen('employeeScreen')">Employee Setup</button>
+    <button type="button" class="secondary" onclick="showScreen('managerScreen')">Manager Setup</button>
+    <button type="button" onclick="window.print()">Print</button>
+    <button type="button" onclick="exportToPDF()">Export to PDF</button>
+    <span id="syncStatus" class="sync-status">Firebase: connecting...</span>
+  </nav>
 
-  <main class="page">
-    <form id="planner" autocomplete="off">
-      <section class="top-row">
-        <div>
-          <label class="field-line"><span>Date</span><input id="dateField" name="date" type="text" /></label>
-          <label class="field-line"><span>Manager</span><input name="manager" type="text" /></label>
-        </div>
-        <div></div>
-      </section>
+  <main id="plannerScreen" class="screen active">
+    <div class="page" id="printArea">
+      <form class="planner-sheet" autocomplete="off">
+        <section class="title-row">
+          <h1>ANITA Planner</h1>
+          <div class="tiny-note">ALDI</div>
+        </section>
 
-      <section class="main-grid">
-        <div class="section">
-          <div class="section-title">Tills</div>
-          <table class="tills-table">
-            <thead>
-              <tr><th></th><th>1</th><th>6</th><th>7</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>1</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
-              <tr><td>2</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
-              <tr><td>3</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
-              <tr><td>4</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
-              <tr><td>5</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
-              <tr><td>6</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
-              <tr><td>7</td><td><input class="cell-input" /></td><td><input class="cell-input" /></td><td><input class="cell-input" /></td></tr>
-            </tbody>
-          </table>
-        </div>
+        <section class="top-fields">
+          <label class="field">
+            <span>Date</span>
+            <input id="dateField" type="text" />
+          </label>
+          <label class="field">
+            <span>Manager</span>
+            <select id="managerDropdown" data-source="managers">
+              <option value=""></option>
+            </select>
+          </label>
+        </section>
 
-        <div class="section">
-          <div class="section-title">Delivery</div>
-          <div class="delivery-body">
-            <div class="delivery-block">
-              <div class="delivery-label">Ambient Backstock</div>
-              <textarea></textarea>
-            </div>
-            <div class="delivery-block">
-              <div class="delivery-label">Freezer</div>
-              <textarea></textarea>
-            </div>
-            <div class="delivery-block">
-              <div class="delivery-label">Chiller</div>
-              <textarea></textarea>
-            </div>
+        <section class="layout-grid">
+          <div class="left-stack">
+            <section class="section">
+              <h2 class="section-title">Reworks</h2>
+              <table class="reworks">
+                <thead>
+                  <tr>
+                    <th>Area</th>
+                    <th>Assigned To</th>
+                    <th class="check-cell">✓</th>
+                  </tr>
+                </thead>
+                <tbody id="reworksBody"></tbody>
+              </table>
+            </section>
+
+            <section class="section">
+              <h2 class="section-title">Tills</h2>
+              <table class="tills">
+                <thead>
+                  <tr>
+                    <th>Till / Task</th>
+                    <th>Employee</th>
+                    <th class="check-cell">✓</th>
+                  </tr>
+                </thead>
+                <tbody id="tillsBody"></tbody>
+              </table>
+            </section>
+
+            <section class="section">
+              <h2 class="section-title">Putbacks / Outside Stock</h2>
+              <table class="putbacks">
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th>Employee</th>
+                    <th class="check-cell">✓</th>
+                  </tr>
+                </thead>
+                <tbody id="putbacksBody"></tbody>
+              </table>
+            </section>
           </div>
-        </div>
 
-        <div class="section">
-          <div class="section-title">Carding</div>
-          <div class="carding-row"><div class="carding-label">1- Aisle 5</div><input /></div>
-          <div class="carding-row"><div class="carding-label">2- Aisle 3&amp;4</div><input /></div>
-          <div class="carding-row"><div class="carding-label">3- Aisle 2</div><input /></div>
-          <div class="carding-row"><div class="carding-label">4- Chiller</div><input /></div>
-          <div class="carding-row"><div class="carding-label">5- Alcohol</div><input /></div>
-          <div class="carding-row"><div class="carding-label">6- Produce</div><input /></div>
-          <div class="carding-row"><div class="carding-label">7-Specials(4)</div><input /></div>
-          <div class="carding-row"><div class="carding-label">8-Specials(3)</div><input /></div>
-        </div>
+          <div class="right-stack">
+            <section class="section">
+              <h2 class="section-title">Carding</h2>
+              <table class="carding">
+                <thead>
+                  <tr>
+                    <th>Area</th>
+                    <th>Assigned To</th>
+                    <th class="check-cell">✓</th>
+                  </tr>
+                </thead>
+                <tbody id="cardingBody"></tbody>
+              </table>
+            </section>
 
-        <div class="section">
-          <div class="section-title">Date Check</div>
-          <div class="datecheck-row"><div class="datecheck-label">chiller</div><input /></div>
-          <div class="datecheck-row"><div class="datecheck-label">Produce</div><input /></div>
-          <div class="datecheck-row"><div class="datecheck-label">Bread</div><input /></div>
-        </div>
-      </section>
+            <section class="section">
+              <h2 class="section-title">Date Check</h2>
+              <table class="date-check">
+                <thead>
+                  <tr>
+                    <th>Area</th>
+                    <th>Manager</th>
+                    <th class="check-cell">✓</th>
+                  </tr>
+                </thead>
+                <tbody id="dateCheckBody"></tbody>
+              </table>
+            </section>
 
-      <section class="breaks-section">
-        <div class="breaks-title">Breaks</div>
-        <table class="breaks-table">
-          <thead><tr><th>Time</th><th>Notes</th></tr></thead>
-          <tbody>
-            <tr><td><input class="notes-input" /></td><td><input class="notes-input" /></td></tr>
-            <tr><td><input class="notes-input" /></td><td><input class="notes-input" /></td></tr>
-            <tr><td><input class="notes-input" /></td><td><input class="notes-input" /></td></tr>
-            <tr><td><input class="notes-input" /></td><td><input class="notes-input" /></td></tr>
-            <tr><td><input class="notes-input" /></td><td><input class="notes-input" /></td></tr>
-          </tbody>
-        </table>
-      </section>
-    </form>
+            <section class="section">
+              <h2 class="section-title">Breaks</h2>
+              <table class="breaks">
+                <thead>
+                  <tr>
+                    <th>Employee / Manager</th>
+                    <th>1st Break</th>
+                    <th>2nd Break</th>
+                  </tr>
+                </thead>
+                <tbody id="breaksBody"></tbody>
+              </table>
+            </section>
+          </div>
+        </section>
+      </form>
+    </div>
   </main>
 
+  <section id="employeeScreen" class="screen">
+    <div class="setup-page">
+      <h2>Employee Setup</h2>
+      <p>Add employee names here. They will automatically appear in the employee dropdowns on the planner.</p>
+
+      <div class="setup-form">
+        <input id="employeeInput" type="text" placeholder="Enter employee name" />
+        <button type="button" onclick="addName('employees')">Save Employee</button>
+      </div>
+
+      <div id="employeeList" class="name-list"></div>
+    </div>
+  </section>
+
+  <section id="managerScreen" class="screen">
+    <div class="setup-page">
+      <h2>Manager Setup</h2>
+      <p>Add manager names here. They will automatically appear in Manager, Date Check, Breaks, Carding and Reworks dropdowns.</p>
+
+      <div class="setup-form">
+        <input id="managerInput" type="text" placeholder="Enter manager name" />
+        <button type="button" onclick="addName('managers')">Save Manager</button>
+      </div>
+
+      <div id="managerList" class="name-list"></div>
+    </div>
+  </section>
+
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAku-atS5H_eCz1L50uC-1M8K34iHzy0_E",
+      authDomain: "albrecht-discounts.firebaseapp.com",
+      databaseURL: "https://albrecht-discounts-default-rtdb.firebaseio.com",
+      projectId: "albrecht-discounts",
+      storageBucket: "albrecht-discounts.firebasestorage.app",
+      messagingSenderId: "63937039340",
+      appId: "1:63937039340:web:df8f231bb151d4907acec9",
+      measurementId: "G-CXMGRJES0H"
+    };
+
+    const STORAGE_KEYS = {
+      employees: "dailyPlannerEmployees",
+      managers: "dailyPlannerManagers"
+    };
+
+    const DB_PATHS = {
+      employees: "plannerSetup/employees",
+      managers: "plannerSetup/managers"
+    };
+
+    let firebaseReady = false;
+    let database = null;
+    let setupData = {
+      employees: [],
+      managers: []
+    };
+
+    try {
+      if (window.firebase && !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      if (window.firebase) {
+        database = firebase.database();
+        firebaseReady = true;
+      }
+    } catch (error) {
+      console.error("Firebase failed to initialise:", error);
+      firebaseReady = false;
+    }
+
+    const ROWS = {
+      reworks: ["Short Life", "Long Life", "Ambient Backstock", "Bread"],
+      tills: ["Selfcheckout", "SCO Swap with", "Till 6", "Till 5", "Till 4", "Till 3", "Till 2", "Till 1"],
+      carding: ["Aisle 5", "Aisle 3&4", "Aisle 2", "Produce", "Chiller", "Alcohol", "Special 4", "Special 3"],
+      dateCheck: ["Bread", "Chiller", "Produce"],
+      putbacks: ["Putbacks", "Stuffs From Outside"]
+    };
+
+    function updateSyncStatus(message) {
+      const status = document.getElementById("syncStatus");
+      if (status) status.textContent = message;
+    }
+
+    function getSaved(type) {
+      return setupData[type] || [];
+    }
+
+    function saveLocalFallback(type, names) {
+      localStorage.setItem(STORAGE_KEYS[type], JSON.stringify(names));
+    }
+
+    function loadLocalFallback(type) {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS[type])) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function snapshotToArray(snapshot) {
+      const value = snapshot.val();
+      if (!value) return [];
+
+      if (Array.isArray(value)) {
+        return value.filter(Boolean);
+      }
+
+      return Object.values(value).filter(Boolean);
+    }
+
+    function cleanNames(names) {
+      return [...new Set(names.map(n => String(n).trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b));
+    }
+
+    function saveNames(type, names) {
+      const cleaned = cleanNames(names);
+      setupData[type] = cleaned;
+      saveLocalFallback(type, cleaned);
+      renderEverything();
+
+      if (!firebaseReady || !database) {
+        updateSyncStatus("Firebase: offline fallback");
+        return;
+      }
+
+      database.ref(DB_PATHS[type]).set(cleaned)
+        .then(() => updateSyncStatus("Firebase: synced"))
+        .catch(error => {
+          console.error("Firebase save failed:", error);
+          updateSyncStatus("Firebase: save failed, using local fallback");
+        });
+    }
+
+    function listenForFirebaseData() {
+      setupData.employees = loadLocalFallback("employees");
+      setupData.managers = loadLocalFallback("managers");
+      renderEverything();
+
+      if (!firebaseReady || !database) {
+        updateSyncStatus("Firebase: offline fallback");
+        return;
+      }
+
+      updateSyncStatus("Firebase: connecting...");
+
+      ["employees", "managers"].forEach(type => {
+        database.ref(DB_PATHS[type]).on("value", snapshot => {
+          setupData[type] = cleanNames(snapshotToArray(snapshot));
+          saveLocalFallback(type, setupData[type]);
+          renderEverything();
+          updateSyncStatus("Firebase: synced");
+        }, error => {
+          console.error("Firebase read failed:", error);
+          updateSyncStatus("Firebase: read failed, using local fallback");
+        });
+      });
+    }
+
+
+    function allPeople() {
+      return [...getSaved("employees"), ...getSaved("managers")];
+    }
+
+    function optionHTML(items) {
+      return '<option value=""></option>' + items.map(name => {
+        const safe = escapeHTML(name);
+        return `<option value="${safe}">${safe}</option>`;
+      }).join("");
+    }
+
+    function escapeHTML(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function selectCell(sourceType) {
+      let names = [];
+      if (sourceType === "employees") names = getSaved("employees");
+      if (sourceType === "managers") names = getSaved("managers");
+      if (sourceType === "all") names = allPeople();
+
+      return `<td class="assigned-cell"><select>${optionHTML(names)}</select></td>`;
+    }
+
+    function blankInputCell() {
+      return '<td class="blank-cell"><input type="text" /></td>';
+    }
+
+    function checkCell() {
+      return '<td class="check-cell"><input type="checkbox" /></td>';
+    }
+
+    function renderPlannerTables() {
+      document.getElementById("reworksBody").innerHTML = ROWS.reworks.map(row => `
+        <tr>
+          <td class="label-cell">${escapeHTML(row)}</td>
+          ${selectCell("all")}
+          ${checkCell()}
+        </tr>
+      `).join("");
+
+      document.getElementById("tillsBody").innerHTML = ROWS.tills.map(row => `
+        <tr>
+          <td class="label-cell">${escapeHTML(row)}</td>
+          ${selectCell("employees")}
+          ${checkCell()}
+        </tr>
+      `).join("");
+
+      document.getElementById("cardingBody").innerHTML = ROWS.carding.map(row => `
+        <tr>
+          <td class="label-cell">${escapeHTML(row)}</td>
+          ${selectCell("all")}
+          ${checkCell()}
+        </tr>
+      `).join("");
+
+      document.getElementById("dateCheckBody").innerHTML = ROWS.dateCheck.map(row => `
+        <tr>
+          <td class="label-cell">${escapeHTML(row)}</td>
+          ${selectCell("managers")}
+          ${checkCell()}
+        </tr>
+      `).join("");
+
+      document.getElementById("breaksBody").innerHTML = Array.from({ length: 7 }, () => `
+        <tr>
+          ${selectCell("all")}
+          ${blankInputCell()}
+          ${blankInputCell()}
+        </tr>
+      `).join("");
+
+      document.getElementById("putbacksBody").innerHTML = ROWS.putbacks.map(row => `
+        <tr>
+          <td class="label-cell">${escapeHTML(row)}</td>
+          ${selectCell("employees")}
+          ${checkCell()}
+        </tr>
+      `).join("");
+
+      const managerDropdown = document.getElementById("managerDropdown");
+      const currentManager = managerDropdown.value;
+      managerDropdown.innerHTML = optionHTML(getSaved("managers"));
+      managerDropdown.value = currentManager;
+    }
+
+    function renderNameList(type) {
+      const listID = type === "employees" ? "employeeList" : "managerList";
+      const list = document.getElementById(listID);
+      const names = getSaved(type);
+
+      if (!names.length) {
+        list.innerHTML = '<div class="empty-state">No names saved yet.</div>';
+        return;
+      }
+
+      list.innerHTML = names.map(name => `
+        <div class="name-row">
+          <span>${escapeHTML(name)}</span>
+          <button class="danger" type="button" onclick="removeName('${type}', '${escapeForJS(name)}')">Remove</button>
+        </div>
+      `).join("");
+    }
+
+    function escapeForJS(text) {
+      return String(text).replaceAll("\\", "\\\\").replaceAll("'", "\\'");
+    }
+
+    function renderEverything() {
+      renderPlannerTables();
+      renderNameList("employees");
+      renderNameList("managers");
+    }
+
+    function addName(type) {
+      const input = document.getElementById(type === "employees" ? "employeeInput" : "managerInput");
+      const value = input.value.trim();
+
+      if (!value) return;
+
+      const existing = getSaved(type);
+      saveNames(type, [...existing, value]);
+      input.value = "";
+      input.focus();
+    }
+
+    function removeName(type, name) {
+      const remaining = getSaved(type).filter(n => n !== name);
+      saveNames(type, remaining);
+    }
+
     function setCurrentDate() {
-      const dateField = document.getElementById('dateField');
-      const now = new Date();
-      const dd = String(now.getDate()).padStart(2, '0');
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const yyyy = now.getFullYear();
+      const dateField = document.getElementById("dateField");
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, "0");
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const yyyy = today.getFullYear();
       dateField.value = `${dd}/${mm}/${yyyy}`;
     }
 
-    function exportPDF() {
-      const element = document.querySelector('.page');
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function exportToPDF() {
+      const planner = document.getElementById("plannerScreen");
+      const previousActive = document.querySelector(".screen.active");
+
+      document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+      planner.classList.add("active");
+
+      const element = document.getElementById("printArea");
       const options = {
         margin: 0,
-        filename: 'anita-planner.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-        pagebreak: { mode: ['avoid-all'] }
+        filename: "daily-planner-checklist.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          scrollX: 0,
+          scrollY: 0
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait"
+        },
+        pagebreak: { mode: ["avoid-all"] }
       };
 
       if (window.html2pdf) {
-        html2pdf().set(options).from(element).save();
+        html2pdf().set(options).from(element).save().then(() => {
+          document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+          if (previousActive) previousActive.classList.add("active");
+          else planner.classList.add("active");
+        });
       } else {
         window.print();
       }
     }
 
-    window.addEventListener('DOMContentLoaded', setCurrentDate);
+    document.addEventListener("DOMContentLoaded", () => {
+      setCurrentDate();
+      listenForFirebaseData();
+
+      document.getElementById("employeeInput").addEventListener("keydown", e => {
+        if (e.key === "Enter") addName("employees");
+      });
+
+      document.getElementById("managerInput").addEventListener("keydown", e => {
+        if (e.key === "Enter") addName("managers");
+      });
+    });
   </script>
 </body>
 </html>
