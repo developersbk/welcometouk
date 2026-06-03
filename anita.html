@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Anita Planner</title>
+  <title>With Love, Sudeesh</title>
 
   <!-- Export to PDF library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
@@ -827,6 +827,7 @@
   <nav class="toolbar">
     <button type="button" class="secondary" onclick="showScreen('currentDayScreen')">Current Day Working Employees</button>
     <button type="button" onclick="showScreen('plannerScreen')">Planner</button>
+    <button type="button" onclick="savePlannerForToday()">Save Planner</button>
     <button type="button" class="secondary" onclick="showScreen('employeeScreen')">Employee Setup</button>
     <button type="button" class="secondary" onclick="showScreen('managerScreen')">Manager Setup</button>
     <button type="button" onclick="window.print()">Print</button>
@@ -1018,13 +1019,16 @@
     const DB_PATHS = {
       employees: "plannerSetup/employees",
       managers: "plannerSetup/managers",
-      currentDay: "plannerSetup/currentDayWorking"
+      currentDay: "plannerSetup/currentDayWorking",
+      plannerData: "plannerSetup/plannerData"
     };
 
     let firebaseReady = false;
     let database = null;
     let currentDayKey = "";
     let currentDayListenerPath = "";
+    let plannerDataListenerPath = "";
+    let savedPlannerData = {};
     let setupData = {
       employees: [],
       managers: [],
@@ -1132,6 +1136,7 @@
 
       if (!firebaseReady || !database) {
         loadCurrentDayLocalFallback();
+        loadPlannerLocalFallback();
         renderEverything();
         updateSyncStatus("Firebase: offline fallback");
         return;
@@ -1183,6 +1188,7 @@
       });
 
       listenForCurrentDayData();
+      listenForPlannerData();
     }
 
 
@@ -1206,6 +1212,10 @@
     function getCurrentDayPath() {
       currentDayKey = getTodayKey();
       return `${DB_PATHS.currentDay}/${currentDayKey}`;
+    }
+
+    function getPlannerDataPath() {
+      return `${DB_PATHS.plannerData}/${getTodayKey()}`;
     }
 
     function selectedEmployeesForToday() {
@@ -1299,8 +1309,10 @@
 
       const managerDropdown = document.getElementById("managerDropdown");
       const currentManager = managerDropdown.value;
-      managerDropdown.innerHTML = optionHTML(getSaved("managers"));
+      managerDropdown.innerHTML = optionHTML(selectedManagersForToday());
       managerDropdown.value = currentManager;
+
+      applySavedPlannerData();
     }
 
     function renderNameList(type) {
@@ -1325,6 +1337,131 @@
       return String(text).replaceAll("\\", "\\\\").replaceAll("'", "\\'");
     }
 
+
+
+    function getFieldKey(element, fallbackIndex) {
+      const section = element.closest(".section");
+      const sectionTitle = section ? section.querySelector(".section-title")?.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_") : "top";
+      const row = element.closest("tr");
+      if (!row) {
+        return element.id || `${sectionTitle}_field_${fallbackIndex}`;
+      }
+
+      const rowIndex = [...row.parentElement.children].indexOf(row);
+      const cellIndex = [...row.children].indexOf(element.closest("td"));
+      const type = element.tagName.toLowerCase();
+      return `${sectionTitle}_r${rowIndex}_c${cellIndex}_${type}`;
+    }
+
+    function collectPlannerData() {
+      const fields = {};
+      const plannerFields = document.querySelectorAll("#printArea input, #printArea select, #printArea textarea");
+
+      plannerFields.forEach((field, index) => {
+        const key = getFieldKey(field, index);
+
+        if (field.type === "checkbox") {
+          fields[key] = field.checked;
+        } else {
+          fields[key] = field.value || "";
+        }
+      });
+
+      return {
+        dateKey: getTodayKey(),
+        dateDisplay: getTodayDisplay(),
+        savedAt: new Date().toISOString(),
+        fields
+      };
+    }
+
+    function applySavedPlannerData() {
+      if (!savedPlannerData || !savedPlannerData.fields) return;
+
+      const plannerFields = document.querySelectorAll("#printArea input, #printArea select, #printArea textarea");
+
+      plannerFields.forEach((field, index) => {
+        const key = getFieldKey(field, index);
+
+        if (!(key in savedPlannerData.fields)) return;
+
+        if (field.type === "checkbox") {
+          field.checked = Boolean(savedPlannerData.fields[key]);
+        } else {
+          field.value = savedPlannerData.fields[key] || "";
+        }
+      });
+
+      const dateField = document.getElementById("dateField");
+      if (dateField && !dateField.value) {
+        dateField.value = getTodayDisplay();
+      }
+    }
+
+    function savePlannerLocalFallback(data) {
+      saveLocalFallback(`plannerData_${getTodayKey()}`, data);
+    }
+
+    function loadPlannerLocalFallback() {
+      savedPlannerData = loadLocalFallback(`plannerData_${getTodayKey()}`) || {};
+      applySavedPlannerData();
+    }
+
+    function savePlannerForToday() {
+      const data = collectPlannerData();
+      savedPlannerData = data;
+      savePlannerLocalFallback(data);
+      applySavedPlannerData();
+
+      if (!firebaseReady || !database) {
+        updateSyncStatus("Firebase: planner saved locally");
+        return;
+      }
+
+      database.ref(getPlannerDataPath()).set(data)
+        .then(() => updateSyncStatus("Firebase: planner saved"))
+        .catch(error => {
+          console.error("Firebase planner save failed:", error);
+          updateSyncStatus("Firebase: planner save failed, local copy kept");
+        });
+    }
+
+    function listenForPlannerData() {
+      loadPlannerLocalFallback();
+
+      if (!firebaseReady || !database) return;
+
+      const path = getPlannerDataPath();
+
+      if (plannerDataListenerPath && plannerDataListenerPath !== path) {
+        database.ref(plannerDataListenerPath).off();
+      }
+
+      plannerDataListenerPath = path;
+
+      database.ref(path).on("value", snapshot => {
+        savedPlannerData = snapshot.val() || {};
+        savePlannerLocalFallback(savedPlannerData);
+        applySavedPlannerData();
+        updateSyncStatus("Firebase: planner loaded");
+      }, error => {
+        console.error("Firebase planner read failed:", error);
+        updateSyncStatus("Firebase: planner read failed, local fallback loaded");
+      });
+    }
+
+    function clearPlannerForNewDay() {
+      savedPlannerData = {};
+      document.querySelectorAll("#printArea input, #printArea select, #printArea textarea").forEach(field => {
+        if (field.id === "dateField") {
+          field.value = getTodayDisplay();
+        } else if (field.type === "checkbox") {
+          field.checked = false;
+        } else {
+          field.value = "";
+        }
+      });
+    }
 
     function isSelected(type, name) {
       const selected = type === "employees" ? selectedEmployeesForToday() : selectedManagersForToday();
@@ -1455,8 +1592,11 @@
       setTimeout(() => {
         setupData.currentEmployees = [];
         setupData.currentManagers = [];
+        savedPlannerData = {};
         setCurrentDate();
+        clearPlannerForNewDay();
         listenForCurrentDayData();
+        listenForPlannerData();
         renderEverything();
         scheduleMidnightRefresh();
       }, msUntilMidnight);
