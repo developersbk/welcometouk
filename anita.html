@@ -2,13 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Anita Planner</title>
 
   <!-- Export to PDF library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
    
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <section id="currentDayScreen" class="screen">
+    <div class="setup-page">
+      <h2>Current Day Working Employees</h2>
+      <p>Select only the employees and managers working today. The planner dropdowns will show only the names ticked here for today. Tomorrow starts fresh automatically after midnight.</p>
+      <div id="currentDayLabel" class="day-label">Current day: loading...</div>
+
+      <div class="setup-actions">
+        <button type="button" onclick="saveCurrentDaySelection()">Save Today’s Selection</button>
+        <button type="button" class="secondary" onclick="selectAllCurrentDay()">Select All</button>
+        <button type="button" class="danger" onclick="clearCurrentDaySelection()">Clear Today</button>
+      </div>
+
+      <div class="current-day-grid">
+        <div class="checklist-panel">
+          <h3>Employees</h3>
+          <div id="currentEmployeeList" class="checklist-list"></div>
+        </div>
+
+        <div class="checklist-panel">
+          <h3>Managers</h3>
+          <div id="currentManagerList" class="checklist-list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <script>
     /*
       Fallback loader because some browsers reject CDN integrity if the CDN changes.
@@ -321,6 +348,81 @@
       padding: 22px;
     }
 
+
+    .current-day-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 16px;
+    }
+
+    .checklist-panel {
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .checklist-panel h3 {
+      margin: 0;
+      padding: 12px;
+      background: #f3f4f6;
+      border-bottom: 1px solid #d1d5db;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+
+    .checklist-list {
+      max-height: 520px;
+      overflow: auto;
+    }
+
+    .worker-check-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .worker-check-row:last-child {
+      border-bottom: 0;
+    }
+
+    .worker-check-row input {
+      width: 18px;
+      height: 18px;
+      accent-color: #111827;
+    }
+
+    .setup-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .day-label {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 7px 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 760px) {
+      .current-day-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .setup-page h2 {
       margin: 0 0 6px;
       font-size: 22px;
@@ -396,6 +498,269 @@
       }
     }
 
+
+    /* Mobile responsive planner view */
+    @media screen and (max-width: 760px) {
+      html,
+      body {
+        background: #f3f4f6;
+        overflow-x: hidden;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 10px;
+        position: sticky;
+        top: 0;
+        z-index: 200;
+      }
+
+      .toolbar button,
+      .toolbar .nav-btn {
+        width: 100%;
+        min-height: 42px;
+        padding: 9px 8px;
+        font-size: 12px;
+        border-radius: 8px;
+        white-space: normal;
+      }
+
+      .sync-status {
+        grid-column: 1 / -1;
+        text-align: center;
+        width: 100%;
+      }
+
+      .page {
+        width: 100%;
+        min-height: auto;
+        margin: 0;
+        padding: 10px;
+        box-shadow: none;
+        overflow: visible;
+        background: #fff;
+      }
+
+      .planner-sheet {
+        width: 100%;
+        height: auto;
+        min-height: auto;
+        display: block;
+      }
+
+      .title-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+
+      h1 {
+        font-size: 15px;
+        text-align: center;
+      }
+
+      .tiny-note {
+        text-align: center;
+      }
+
+      .top-fields {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .field {
+        grid-template-columns: 92px 1fr;
+        min-height: 44px;
+      }
+
+      .field span {
+        font-size: 12px;
+      }
+
+      input,
+      select,
+      textarea {
+        font-size: 14px;
+        min-height: 40px;
+      }
+
+      .layout-grid {
+        display: block;
+      }
+
+      .left-stack,
+      .right-stack {
+        display: block;
+      }
+
+      .section {
+        margin-bottom: 12px;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .section-title {
+        padding: 9px 8px;
+        font-size: 12px;
+      }
+
+      table {
+        table-layout: fixed;
+      }
+
+      th,
+      td {
+        height: 42px;
+        font-size: 12px;
+      }
+
+      th {
+        padding: 6px 4px;
+      }
+
+      td.label-cell {
+        padding: 0 8px;
+        white-space: normal;
+        line-height: 1.15;
+      }
+
+      .assigned-cell select,
+      .assigned-cell input {
+        font-size: 13px;
+        min-height: 40px;
+        padding: 0 8px;
+      }
+
+      .reworks th:nth-child(1),
+      .carding th:nth-child(1),
+      .date-check th:nth-child(1),
+      .putbacks th:nth-child(1),
+      .tills th:nth-child(1) {
+        width: 48%;
+      }
+
+      .breaks th:nth-child(1) {
+        width: 44%;
+      }
+
+      .breaks th:nth-child(2),
+      .breaks th:nth-child(3) {
+        width: 28%;
+      }
+
+      .setup-page {
+        width: 100%;
+        margin: 0;
+        min-height: calc(100vh - 70px);
+        border-radius: 0;
+        box-shadow: none;
+        padding: 16px 12px 24px;
+      }
+
+      .setup-page h2 {
+        font-size: 20px;
+      }
+
+      .setup-page p {
+        font-size: 13px;
+      }
+
+      .setup-form {
+        grid-template-columns: 1fr;
+      }
+
+      .setup-form input {
+        min-height: 44px;
+        font-size: 15px;
+      }
+
+      .setup-form button,
+      .setup-actions button {
+        width: 100%;
+        min-height: 42px;
+      }
+
+      .name-row {
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        padding: 10px;
+      }
+
+      .name-row button {
+        min-height: 34px;
+        padding: 7px 10px;
+        font-size: 12px;
+      }
+
+      .current-day-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .setup-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .checklist-list {
+        max-height: none;
+      }
+
+      .worker-check-row {
+        grid-template-columns: 26px 1fr;
+        padding: 12px;
+        font-size: 14px;
+      }
+
+      .worker-check-row input {
+        width: 20px;
+        height: 20px;
+        min-height: 20px;
+      }
+    }
+
+    @media screen and (min-width: 761px) and (max-width: 1100px) {
+      .page {
+        width: calc(100% - 24px);
+        margin: 12px auto;
+        padding: 12px;
+        overflow: visible;
+      }
+
+      .planner-sheet {
+        width: 100%;
+        height: auto;
+        min-height: auto;
+      }
+
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 200;
+      }
+
+      .layout-grid {
+        gap: 12px;
+      }
+
+      th,
+      td {
+        height: 34px;
+        font-size: 11px;
+      }
+
+      input,
+      select {
+        font-size: 12px;
+      }
+    }
+
+
     @media print {
       html,
       body {
@@ -460,6 +825,7 @@
 
 <body>
   <nav class="toolbar">
+    <button type="button" class="secondary" onclick="showScreen('currentDayScreen')">Current Day Working Employees</button>
     <button type="button" onclick="showScreen('plannerScreen')">Planner</button>
     <button type="button" class="secondary" onclick="showScreen('employeeScreen')">Employee Setup</button>
     <button type="button" class="secondary" onclick="showScreen('managerScreen')">Manager Setup</button>
@@ -605,6 +971,33 @@
     </div>
   </section>
 
+
+  <section id="currentDayScreen" class="screen">
+    <div class="setup-page">
+      <h2>Current Day Working Employees</h2>
+      <p>Select only the employees and managers working today. The planner dropdowns will show only the names ticked here for today. Tomorrow starts fresh automatically after midnight.</p>
+      <div id="currentDayLabel" class="day-label">Current day: loading...</div>
+
+      <div class="setup-actions">
+        <button type="button" onclick="saveCurrentDaySelection()">Save Today’s Selection</button>
+        <button type="button" class="secondary" onclick="selectAllCurrentDay()">Select All</button>
+        <button type="button" class="danger" onclick="clearCurrentDaySelection()">Clear Today</button>
+      </div>
+
+      <div class="current-day-grid">
+        <div class="checklist-panel">
+          <h3>Employees</h3>
+          <div id="currentEmployeeList" class="checklist-list"></div>
+        </div>
+
+        <div class="checklist-panel">
+          <h3>Managers</h3>
+          <div id="currentManagerList" class="checklist-list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAku-atS5H_eCz1L50uC-1M8K34iHzy0_E",
@@ -624,14 +1017,19 @@
 
     const DB_PATHS = {
       employees: "plannerSetup/employees",
-      managers: "plannerSetup/managers"
+      managers: "plannerSetup/managers",
+      currentDay: "plannerSetup/currentDayWorking"
     };
 
     let firebaseReady = false;
     let database = null;
+    let currentDayKey = "";
+    let currentDayListenerPath = "";
     let setupData = {
       employees: [],
-      managers: []
+      managers: [],
+      currentEmployees: [],
+      currentManagers: []
     };
 
     const SEEDED_EMPLOYEES_FROM_JSON = [
@@ -688,12 +1086,14 @@
     }
 
     function saveLocalFallback(type, names) {
-      localStorage.setItem(STORAGE_KEYS[type], JSON.stringify(names));
+      const key = STORAGE_KEYS[type] || type;
+      localStorage.setItem(key, JSON.stringify(names));
     }
 
     function loadLocalFallback(type) {
+      const key = STORAGE_KEYS[type] || type;
       try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEYS[type])) || [];
+        return JSON.parse(localStorage.getItem(key)) || [];
       } catch {
         return [];
       }
@@ -731,6 +1131,8 @@
       renderEverything();
 
       if (!firebaseReady || !database) {
+        loadCurrentDayLocalFallback();
+        renderEverything();
         updateSyncStatus("Firebase: offline fallback");
         return;
       }
@@ -779,8 +1181,44 @@
           updateSyncStatus("Firebase: read failed, using local fallback");
         });
       });
+
+      listenForCurrentDayData();
     }
 
+
+
+    function getTodayKey() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const dd = String(today.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function getTodayDisplay() {
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, "0");
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const yyyy = today.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function getCurrentDayPath() {
+      currentDayKey = getTodayKey();
+      return `${DB_PATHS.currentDay}/${currentDayKey}`;
+    }
+
+    function selectedEmployeesForToday() {
+      return cleanNames(setupData.currentEmployees || []);
+    }
+
+    function selectedManagersForToday() {
+      return cleanNames(setupData.currentManagers || []);
+    }
+
+    function selectedPeopleForToday() {
+      return cleanNames([...selectedEmployeesForToday(), ...selectedManagersForToday()]);
+    }
 
     function allPeople() {
       return [...getSaved("employees"), ...getSaved("managers")];
@@ -804,9 +1242,9 @@
 
     function selectCell(sourceType) {
       let names = [];
-      if (sourceType === "employees") names = getSaved("employees");
-      if (sourceType === "managers") names = getSaved("managers");
-      if (sourceType === "all") names = allPeople();
+      if (sourceType === "employees") names = selectedEmployeesForToday();
+      if (sourceType === "managers") names = selectedManagersForToday();
+      if (sourceType === "all") names = selectedPeopleForToday();
 
       return `<td class="assigned-cell"><select>${optionHTML(names)}</select></td>`;
     }
@@ -887,10 +1325,148 @@
       return String(text).replaceAll("\\", "\\\\").replaceAll("'", "\\'");
     }
 
+
+    function isSelected(type, name) {
+      const selected = type === "employees" ? selectedEmployeesForToday() : selectedManagersForToday();
+      return selected.includes(name);
+    }
+
+    function renderCurrentDayList(type) {
+      const listID = type === "employees" ? "currentEmployeeList" : "currentManagerList";
+      const list = document.getElementById(listID);
+      if (!list) return;
+
+      const names = getSaved(type);
+      if (!names.length) {
+        list.innerHTML = '<div class="empty-state">No names saved yet. Add names in the setup page first.</div>';
+        return;
+      }
+
+      list.innerHTML = names.map(name => {
+        const safe = escapeHTML(name);
+        const checked = isSelected(type, name) ? "checked" : "";
+        return `
+          <label class="worker-check-row">
+            <input type="checkbox" data-current-day-type="${type}" value="${safe}" ${checked} />
+            <span>${safe}</span>
+          </label>
+        `;
+      }).join("");
+    }
+
+    function renderCurrentDayScreen() {
+      const label = document.getElementById("currentDayLabel");
+      if (label) label.textContent = `Current day: ${getTodayDisplay()}`;
+      renderCurrentDayList("employees");
+      renderCurrentDayList("managers");
+    }
+
+    function getCheckedCurrentDayNames(type) {
+      return [...document.querySelectorAll(`input[data-current-day-type="${type}"]:checked`)]
+        .map(input => input.value)
+        .filter(Boolean);
+    }
+
+    function saveCurrentDaySelection() {
+      const employees = cleanNames(getCheckedCurrentDayNames("employees"));
+      const managers = cleanNames(getCheckedCurrentDayNames("managers"));
+
+      setupData.currentEmployees = employees;
+      setupData.currentManagers = managers;
+
+      saveLocalFallback(`currentEmployees_${getTodayKey()}`, employees);
+      saveLocalFallback(`currentManagers_${getTodayKey()}`, managers);
+
+      renderEverything();
+
+      if (!firebaseReady || !database) {
+        updateSyncStatus("Firebase: offline fallback");
+        return;
+      }
+
+      database.ref(getCurrentDayPath()).set({
+        employees,
+        managers,
+        updatedAt: new Date().toISOString()
+      })
+        .then(() => updateSyncStatus("Firebase: current day synced"))
+        .catch(error => {
+          console.error("Firebase current day save failed:", error);
+          updateSyncStatus("Firebase: current day save failed, using local fallback");
+        });
+    }
+
+    function selectAllCurrentDay() {
+      document.querySelectorAll('#currentDayScreen input[type="checkbox"]').forEach(input => {
+        input.checked = true;
+      });
+      saveCurrentDaySelection();
+    }
+
+    function clearCurrentDaySelection() {
+      document.querySelectorAll('#currentDayScreen input[type="checkbox"]').forEach(input => {
+        input.checked = false;
+      });
+      saveCurrentDaySelection();
+    }
+
+    function loadCurrentDayLocalFallback() {
+      setupData.currentEmployees = loadLocalFallback(`currentEmployees_${getTodayKey()}`);
+      setupData.currentManagers = loadLocalFallback(`currentManagers_${getTodayKey()}`);
+    }
+
+    function listenForCurrentDayData() {
+      loadCurrentDayLocalFallback();
+      renderEverything();
+
+      if (!firebaseReady || !database) return;
+
+      const path = getCurrentDayPath();
+
+      if (currentDayListenerPath && currentDayListenerPath !== path) {
+        database.ref(currentDayListenerPath).off();
+      }
+
+      currentDayListenerPath = path;
+
+      database.ref(path).on("value", snapshot => {
+        const value = snapshot.val() || {};
+        setupData.currentEmployees = cleanNames(value.employees || []);
+        setupData.currentManagers = cleanNames(value.managers || []);
+
+        saveLocalFallback(`currentEmployees_${getTodayKey()}`, setupData.currentEmployees);
+        saveLocalFallback(`currentManagers_${getTodayKey()}`, setupData.currentManagers);
+
+        renderEverything();
+        updateSyncStatus("Firebase: current day synced");
+      }, error => {
+        console.error("Firebase current day read failed:", error);
+        updateSyncStatus("Firebase: current day read failed, using local fallback");
+      });
+    }
+
+    function scheduleMidnightRefresh() {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      tomorrow.setHours(0, 0, 2, 0);
+      const msUntilMidnight = tomorrow.getTime() - now.getTime();
+
+      setTimeout(() => {
+        setupData.currentEmployees = [];
+        setupData.currentManagers = [];
+        setCurrentDate();
+        listenForCurrentDayData();
+        renderEverything();
+        scheduleMidnightRefresh();
+      }, msUntilMidnight);
+    }
+
     function renderEverything() {
       renderPlannerTables();
       renderNameList("employees");
       renderNameList("managers");
+      renderCurrentDayScreen();
     }
 
     function addName(type) {
@@ -912,11 +1488,7 @@
 
     function setCurrentDate() {
       const dateField = document.getElementById("dateField");
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const yyyy = today.getFullYear();
-      dateField.value = `${dd}/${mm}/${yyyy}`;
+      dateField.value = getTodayDisplay();
     }
 
     function showScreen(id) {
@@ -966,6 +1538,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       setCurrentDate();
       listenForFirebaseData();
+      scheduleMidnightRefresh();
 
       document.getElementById("employeeInput").addEventListener("keydown", e => {
         if (e.key === "Enter") addName("employees");
